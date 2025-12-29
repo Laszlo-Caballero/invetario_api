@@ -2,10 +2,14 @@
 
 namespace invetario_api.Modules.unit.dto
 {
-    public class UpdateUnitDto : UnitDto
+    public class UnitDto
     {
         [Required]
-        public bool? status { get; set; }
+        [StringLength(100, MinimumLength = 3)]
+        public string name { get; set; }
 
+        [Required]
+        [MinLength(1)]
+        public string description { get; set; }
     }
 }

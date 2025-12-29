@@ -1,6 +1,7 @@
 using invetario_api.database;
 using invetario_api.Filters;
 using invetario_api.Modules.categories;
+using invetario_api.Modules.unit;
 using invetario_api.utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ builder.Services.AddDbContext<Database>(opt =>
 });
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IUnitService, UnitService>();
 
 builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
