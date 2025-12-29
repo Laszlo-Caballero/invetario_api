@@ -53,5 +53,21 @@ namespace invetario_api.utils
             return new ResponseApi<T>(_errors);
         }
 
+
+        public static ResponseApi<T> Forbidden()
+        {
+            return new ResponseApi<T>(false, StatusCodes.Status403Forbidden, "Forbidden");
+        }
+
+        public static ResponseApi<T> Unauthorized()
+        {
+            return new ResponseApi<T>(false, StatusCodes.Status401Unauthorized, "Unauthorized");
+        }
+
+
+        public string toJson()
+        {
+            return System.Text.Json.JsonSerializer.Serialize(this);
+        }
     }
 }

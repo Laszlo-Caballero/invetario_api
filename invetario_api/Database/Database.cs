@@ -5,6 +5,7 @@ using invetario_api.Modules.users.entity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
+using invetario_api.Modules.store.entity;
 namespace invetario_api.database
 {
     public class Database : DbContext
@@ -16,7 +17,10 @@ namespace invetario_api.database
 
         public DbSet<Product> products { get; set; }
 
-        public Database(DbContextOptions<Database> options): base(options) { }
+
+        public DbSet<Store> stores { get; set; }
+
+public Database(DbContextOptions<Database> options): base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

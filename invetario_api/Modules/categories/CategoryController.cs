@@ -1,7 +1,9 @@
 ﻿
 using invetario_api.Modules.categories.dto;
 using invetario_api.Modules.categories.entity;
+using invetario_api.Modules.users.entity;
 using invetario_api.utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -20,6 +22,7 @@ namespace invetario_api.Modules.categories
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> FindAll() {
 
             var result = await _categoryService.getCategories();
@@ -27,6 +30,7 @@ namespace invetario_api.Modules.categories
         }
 
         [HttpGet("{categoryId:int}")]
+        [Authorize]
         public async Task<IActionResult> FindById(int categoryId) {
 
             var result = await _categoryService.getCategoryById(categoryId);
@@ -40,6 +44,7 @@ namespace invetario_api.Modules.categories
         }
 
         [HttpPost]
+        [Authorize(Roles = "ADMIN,STORE")]
         public async Task<IActionResult> Create([FromBody] CategoryDto data)
         {
             if (!ModelState.IsValid) {
@@ -53,6 +58,7 @@ namespace invetario_api.Modules.categories
         }
 
         [HttpPut("{categoryId:int}")]
+        [Authorize(Roles = "ADMIN,STORE")]
         public async Task<IActionResult> update(int categoryId, [FromBody] UpdateCategoryDto data)
         {
             if (!ModelState.IsValid)
@@ -72,6 +78,7 @@ namespace invetario_api.Modules.categories
 
 
         [HttpDelete("{categoryId:int}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> delete(int categoryId)
         {
             var result = await _categoryService.deleteCategory(categoryId);

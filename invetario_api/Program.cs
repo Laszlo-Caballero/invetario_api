@@ -1,11 +1,17 @@
 using invetario_api.database;
 using invetario_api.Filters;
+using invetario_api.Jwt;
 using invetario_api.Modules.categories;
 using invetario_api.Modules.unit;
 using invetario_api.utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
+using invetario_api.Modules.auth;
+using invetario_api.Modules.users;
+using invetario_api.Modules.store;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -26,6 +32,10 @@ builder.Services.AddDbContext<Database>(opt =>
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitService, UnitService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IStoreService, StoreService>();
 
 builder.Services.Configure<ApiBehaviorOptions>(opt =>
 {
@@ -43,6 +53,56 @@ builder.Services.Configure<ApiBehaviorOptions>(opt =>
 });
 
 
+builder.Services.AddSingleton<JwtUtils>();
+
+
+builder.Services.AddAuthentication(
+    opt =>
+    {
+        opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }
+).AddJwtBearer(opt =>
+{
+    opt.RequireHttpsMetadata = false;
+    opt.SaveToken = true;
+    opt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = false,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(
+                builder.Configuration["Jwt:Key"]!
+            )
+        )
+    };
+
+    opt.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse(); 
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+
+            var res = ResponseApi<object>.Unauthorized().toJson();
+            await context.Response.WriteAsync(res);
+        },
+
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+
+            var res = ResponseApi<object>.Forbidden().toJson();
+            await context.Response.WriteAsync(res);
+        }
+    };
+});
+
+
 var app = builder.Build();
 
 
@@ -53,7 +113,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
